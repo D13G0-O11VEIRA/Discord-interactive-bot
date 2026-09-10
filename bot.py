@@ -18,16 +18,23 @@ class MeuBot(commands.Bot): # Create a custom bot class that allows for command 
         )
 
     async def setup_hook(self):
-        for arquivo in os.listdir("./cogs"): # Loop through all files in the cogs directory
+        for arquivo in os.listdir("./cogs"):  # Loop through all files in the cogs directory
             if arquivo.endswith(".py"):
                 nome = f"cogs.{arquivo[:-3]}"
                 try:
-                    await self.load_extension(nome) # Load the cog and print a success message
+                    await self.load_extension(nome)
                     print(f"✓ {arquivo} carregado")
                 except Exception as e:
-                    print(f"✗ Erro em {arquivo}: {e}") # Print an error message if the cog fails to load
-        await self.tree.sync() # Sync the bot's commands with Discord and print a success message
+                    print(f"✗ Erro em {arquivo}: {e}")
+
+        # Sincroniza os comandos globalmente
+        comandos = await self.tree.sync()
+
         print("Comandos sincronizados!")
+        print(f"Total: {len(comandos)} comandos")
+
+        for comando in comandos:
+            print(f" - /{comando.name}")
 
 bot = MeuBot() # Create an instance of the bot
 
