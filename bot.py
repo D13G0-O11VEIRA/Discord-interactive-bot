@@ -8,6 +8,7 @@ load_dotenv() # Load environment variables from the .env file
 
 intents = discord.Intents.default() # Create an instance of Intents with default settings
 intents.message_content = True # Allow the bot to read message content
+intents.members = True # Allow the bot to access member information
 
 class MeuBot(commands.Bot): # Create a custom bot class that allows for command handling and event management
     def __init__(self):
