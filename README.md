@@ -39,7 +39,7 @@ py -m venv .venv
 pip install -r requirements.txt
 ```
 
-Crie um arquivo `.env` baseado no `.env.example`:
+Crie um arquivo `.env`
 
 ```env
 DISCORD_TOKEN=SEU_TOKEN
