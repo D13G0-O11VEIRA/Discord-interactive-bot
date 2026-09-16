@@ -1,57 +1,73 @@
+import logging
 import os
 import discord
 from discord.ext import commands
-from discord import app_commands
 from dotenv import load_dotenv
 
-load_dotenv() # Load environment variables from the .env file
+# Configuração inicial
+load_dotenv()
 
-intents = discord.Intents.default() # Create an instance of Intents with default settings
-intents.message_content = True # Allow the bot to read message content
-intents.members = True # Allow the bot to access member information
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
 
-class MeuBot(commands.Bot): # Create a custom bot class that allows for command handling and event management
-    def __init__(self):
+logger = logging.getLogger("DiscordBot")    # Cria um logger para o bot
+intents = discord.Intents.default()         # Permite que o bot receba eventos do Discord
+intents.message_content = True              # Permite que o bot leia o conteúdo das mensagens
+intents.members = True                      # Permite que o bot receba eventos de membros (como entrada e saída do servidor)
+
+# Classe principal do Bot
+class MeuBot(commands.Bot):
+    """Classe principal do bot."""
+
+    def __init__(self) -> None:
         super().__init__(
             command_prefix="!",
             intents=intents
         )
 
-    async def setup_hook(self):
-        for arquivo in os.listdir("./cogs"):  # Loop through all files in the cogs directory
-            if arquivo.endswith(".py"):
-                nome = f"cogs.{arquivo[:-3]}"
-                try:
-                    await self.load_extension(nome)
-                    print(f"✓ {arquivo} carregado")
-                except Exception as e:
-                    print(f"✗ Erro em {arquivo}: {e}")
+    async def setup_hook(self) -> None:
+        """Carrega automaticamente todos os Cogs."""
 
-        # Sincroniza os comandos globalmente
-        comandos = await self.tree.sync()
+        for arquivo in os.listdir("./cogs"): # Carrega todos os arquivos na pasta cogs
+            if not arquivo.endswith(".py"):
+                continue
+            if arquivo.startswith("__"):
+                continue
+            nome = f"cogs.{arquivo[:-3]}"
+            try:
+                await self.load_extension(nome)
+                logger.info("✓ %s carregado", arquivo)
+            except Exception:
+                logger.exception("Erro ao carregar %s", arquivo)
 
-        print("Comandos sincronizados!")
-        print(f"Total: {len(comandos)} comandos")
+        comandos = await self.tree.sync() # Sincroniza os comandos de barra (/) com o Discord
+        logger.info("Comandos sincronizados (%s)", len(comandos))
 
-        for comando in comandos:
-            print(f" - /{comando.name}")
+        for comando in comandos: # Loga os comandos sincronizados
+            logger.info(" - /%s", comando.name)
 
-bot = MeuBot() # Create an instance of the bot
+bot = MeuBot()
 
-@bot.event # Event handler for when the bot is ready
-async def on_ready():
-    print(f"{bot.user} está online!")
+# Evento disparado quando o bot está pronto
+@bot.event 
+async def on_ready() -> None:
+    logger.info("%s está online!", bot.user)
 
-
-@bot.tree.command(name="ping", description="Mostra a latência do bot")
-async def ping(interaction: discord.Interaction):
+# Comandos globais
+@bot.tree.command(
+    name="ping",
+    description="Mostra a latência do bot."
+)
+async def ping(interaction: discord.Interaction) -> None:
 
     embed = discord.Embed(
         title="🏓 Pong!",
-        description=f"Latência: **{round(bot.latency*1000)}ms**",
+        description=f"Latência: **{round(bot.latency * 1000)} ms**",
         color=discord.Color.purple()
     )
-
     await interaction.response.send_message(embed=embed)
 
-bot.run(os.getenv("DISCORD_TOKEN")) # Run the bot using the token from the environment variable
+# Inicialização
+bot.run(os.getenv("DISCORD_TOKEN"))
