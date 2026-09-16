@@ -1,26 +1,46 @@
 import discord
 from discord.ext import commands
 
-class Welcome(commands.Cog):
+COR_PADRAO = discord.Color.purple()
 
-    def __init__(self, bot):
+
+class Welcome(commands.Cog):
+    """Cog responsável pelas boas-vindas."""
+
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: discord.Member) -> None:
 
         canal = member.guild.system_channel
 
-        if canal:
-            embed = discord.Embed(
-                title="🎉 Bem-vindo!",
-                description=f"Olá {member.mention}, seja bem-vindo ao servidor!",
-                color=discord.Color.purple()
-            )
+        if canal is None:
+            return
 
-            embed.set_thumbnail(url=member.display_avatar.url)
+        embed = discord.Embed(
+            title="🎉 Bem-vindo!",
+            description=(
+                f"Olá {member.mention}, seja muito bem-vindo(a) "
+                f"ao **{member.guild.name}**!"
+            ),
+            color=COR_PADRAO
+        )
 
-            await canal.send(embed=embed)
+        embed.set_thumbnail(url=member.display_avatar.url)
 
-async def setup(bot):
+        embed.add_field(
+            name="Membro nº",
+            value=str(member.guild.member_count),
+            inline=True
+        )
+
+        embed.set_footer(
+            text="Esperamos que aproveite a comunidade!"
+        )
+
+        await canal.send(embed=embed)
+
+
+async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Welcome(bot))
