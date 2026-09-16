@@ -12,13 +12,16 @@ class Info(commands.Cog):
         description="Mostra um painel com botão"
     )
     async def painel(self, interaction: discord.Interaction):
+        # Confirma imediatamente que a interação foi recebida
+        await interaction.response.defer()
+
         embed = discord.Embed(
             title="Painel Interativo",
             description="Clique no botão abaixo.",
             color=discord.Color.purple()
         )
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             embed=embed,
             view=PainelView()
         )
