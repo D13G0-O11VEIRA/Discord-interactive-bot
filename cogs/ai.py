@@ -3,30 +3,53 @@ from discord.ext import commands
 from services.gemini import GeminiService
 
 class AI(commands.Cog):
+    """Cog responsável pelas funcionalidades de inteligência artificial."""
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.gemini = GeminiService()
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message) -> None:
+        """Processa mensagens que mencionam a Iki."""
 
-        if message.author.bot:                          # Ignora mensagens de outros bots evitando loops infinitos
+        if message.author.bot:                               # Ignora mensagens enviadas por bots
             return
-        if self.bot.user not in message.mentions:       # Ignora mensagens que não mencionam o bot
+        if self.bot.user is None:                            # Garante que o bot está disponível
             return
-        texto = message.content.replace(                # Remove a menção do bot da mensagem para o processamento
+        if self.bot.user not in message.mentions:            # Só responde quando a Iki é mencionada
+            return
+        texto = self._remover_mencao(message)
+        if not texto:                                        # Caso o usuário apenas mencione a Iki sem escrever nada
+            await message.reply(
+                "Oi! Você queria falar comigo? ¬_¬"
+            )
+            return
+        try:                                                 # Tenta gerar uma resposta usando o Gemini
+            async with message.channel.typing():
+                resposta = await self.gemini.responder(texto)
+            await message.reply(resposta)
+        except Exception:
+            await message.reply(
+                "Desculpa, tive um probleminha para pensar nessa resposta. (╯°□°）╯︵ ┻━┻"
+            )
+
+    def _remover_mencao(self, message: discord.Message) -> str:
+        """Remove a menção da Iki da mensagem."""
+
+        if self.bot.user is None:
+            return message.content
+        texto = message.content
+        texto = texto.replace(
             f"<@{self.bot.user.id}>",
             ""
-        ).replace(
+        )
+        texto = texto.replace(
             f"<@!{self.bot.user.id}>",
             ""
-        ).strip()
-        if not texto:                                   # Ignora mensagens vazias
-            return
-        async with message.channel.typing():            # Mostra que o bot está digitando
-            resposta = self.gemini.responder(texto)
-        await message.reply(resposta)
+        )
+        return texto.strip()
 
-async def setup(bot):
+async def setup(bot: commands.Bot) -> None:
+    """Carrega o Cog de inteligência artificial."""
     await bot.add_cog(AI(bot))
