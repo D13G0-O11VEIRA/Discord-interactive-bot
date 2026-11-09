@@ -1,0 +1,11 @@
+# Endereço do WebSocket do bot (veja docs/MINECRAFT.md).
+# Use wss:// quando o bot estiver atrás de um túnel/proxy com HTTPS.
+url: "wss://seu-endereco-publico/ws"
+
+# Segredo compartilhado: precisa ser IGUAL ao MC_WS_TOKEN do .env do bot.
+token: "troque-este-token"
+
+# O que enviar ao Discord além das mensagens de chat:
+send-joins: true
+send-deaths: true
+send-advancements: false

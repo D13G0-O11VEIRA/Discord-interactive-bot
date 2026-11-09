@@ -1,0 +1,6 @@
+name: DiscordBridge
+version: 1.0.0
+main: dev.discordbridge.BridgePlugin
+api-version: '1.18'
+description: Liga o chat do servidor a um bot de Discord por WebSocket.
+author: D13G0-O11VEIRA
